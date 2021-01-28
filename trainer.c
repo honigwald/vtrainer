@@ -3,19 +3,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define clear() printf("\033[H\033[J")
+#define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
+
+void print_header();
+
 int main(void) {
-    clear_screen(0,0);
     list *head = initialize();
     list *p_head = head;
     int settings;
     while(TRUE) {
+        print_header();
         switch(menue()) {
             case LEAVE:
                 save(head);
                 puts("Bis zum nächsten Mal.");
                 exit(EXIT_SUCCESS);
             case TRAINING:
-                clear_screen(0,0);
                 trainer(head);
                 break;
             case ADD_VOC:
@@ -54,24 +58,31 @@ int save(list *head) {
     return 0;
 }
 
-void clear_screen(int line, int column) {
-    printf("\033[%d;%dH", line, column);
+void print_header() {
+    clear();
+    /* PRINT HEADER */
+    puts("╔═════════════════════════════════════════════════════════════════╗");
+    puts("║   ________                   __                                 ║");
+    puts("║  |        \\                 |  \\                                ║");
+    puts("║   \\$$$$$$$$______   ______   \\$$ _______    ______    ______    ║");
+    puts("║     | $$  /      \\ |      \\ |  \\|       \\  /      \\  /      \\   ║");
+    puts("║     | $$ |  $$$$$$\\ \\$$$$$$\\| $$| $$$$$$$\\|  $$$$$$\\|  $$$$$$\\  ║");
+    puts("║     | $$ | $$   \\$$/      $$| $$| $$  | $$| $$    $$| $$   \\$$  ║");
+    puts("║     | $$ | $$     |  $$$$$$$| $$| $$  | $$| $$$$$$$$| $$        ║");
+    puts("║     | $$ | $$      \\$$    $$| $$| $$  | $$ \\$$     \\| $$        ║");
+    puts("║      \\$$  \\$$       \\$$$$$$$ \\$$ \\$$   \\$$  \\$$$$$$$ \\$$        ║");
+    puts("║                                                                 ║");
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+}
 
-    int width = 0;
-    int height = 0;
-    while(height < 50) {
-        while(width < 80) {
-            printf(" ");
-            width++;
-        }
-        printf("\n");
-        width = 0;
-        height++;
-    }
-    printf("\033[%d;%dH", line, column);
+void clear_screen(int line, int column) {
+
+    /* DELETE THIS OBSOLETE FUNCTION */
+
+    clear();
     /* PRINT HEADER */
     puts("*******************************************************************");
-    puts("|   ________                   __                                 |"); 
+    puts("|   ________                   __                                 |");
     puts("|  |        \\                 |  \\                                |");
     puts("|   \\$$$$$$$$______   ______   \\$$ _______    ______    ______    |");
     puts("|     | $$  /      \\ |      \\ |  \\|       \\  /      \\  /      \\   |");
@@ -139,19 +150,35 @@ list *initialize() {
     return head;
 }
 
+void dump_stdin() {
+    char dump;
+    while ((dump = getchar()) != '\n' && dump != EOF);
+}
+
 void print_vocabulary(list *head) {
+    gotoxy(0,12);
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║                        VOKABELLISTE                             ║");
+    puts("╚═════════════════════════════════════════════════════════════════╝");
+    int pause = 0;
     puts("----------------------------------------------------------------------");
     printf("| %25s | %25s | %2s |\n", "Original         ", "Übersetzung      ", "Fortschritt");
     puts("----------------------------------------------------------------------");
+    dump_stdin();
     while(head) {
         printf("| %25s | %24s | %10d |\n", head->original, head->translation, head->progress);
         //putchar(head->translation[0]);
         head = head->next;
+        pause++;
+        if(pause == 20) {
+            pause = 0;
+            puts("Rollen...");
+            getc(stdin);
+        }
     }
     puts("----------------------------------------------------------------------");
-    char dump;
-    while ((dump = getchar()) != '\n' && dump != EOF);
-    char wait = getc(stdin);
+    puts("Taste drücken...");
+    getc(stdin);
 }
 
 
@@ -204,21 +231,40 @@ list *add_vocabulary(list *head) {
 
 
 void trainer(list *head) {
-    char dump, answer[80];
+    char dump;
+    char source[80], trans[80], answer[80];
     list *p_head = head;
     int settings, choice;
-
-    puts("|                 TRAINERMENUE: Einstellungen                     |");
-    puts("*******************************************************************");
-    puts("| 1. Ungarisch -> Deutsch                                         |");
-    puts("| 2. Deutsch -> Ungarisch                                         |");
-    puts("| 3. Zufällig                                                     |");
-    puts("*******************************************************************");
-    puts("| 0. Zurück                                                       |");
-    puts("*******************************************************************");
-    printf(">> ");
+    int i=0;
+    gotoxy(0,12);
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║                                                                 ║");
+    puts("║                    TRAINER: Einstellungen                       ║");
+    puts("║                                                                 ║");
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║ 1. Ungarisch -> Deutsch                                         ║");
+    puts("║ 2. Deutsch -> Ungarisch                                         ║");
+    puts("║ 3. Zufällig                                                     ║");
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║ 0. Zurück                                                       ║");
+    puts("╚═════════════════════════════════════════════════════════════════╝");
+    printf("\033[K>> ");
     scanf("%d", &choice);
 
+    gotoxy(0,12);
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║                                                                 ║");
+    puts("║                    TRAINER: Hilfe                               ║");
+    puts("║                                                                 ║");
+    puts("╠═════════════════════════════════════════════════════════════════╣");
+    puts("║ Folgende Befehle sind möglich                                   ║");
+    puts("║ -----------------------------                                   ║");
+    puts("║ 1. stop: Beendet den Trainer                                    ║");
+    puts("║ 2. help: Enthüllt Buchstaben                                    ║");
+    puts("╚═════════════════════════════════════════════════════════════════╝");
+
+    /* Store cursor position */
+    printf("\033[s");
 
     while ((dump = getchar()) != '\n' && dump != EOF);
     while(p_head) {
@@ -230,28 +276,39 @@ void trainer(list *head) {
                 settings = 2;
                 break;
             case 3:
-                puts("RANDOM");
+                settings = (rand() % 2) + 1;
                 break;
             case 0:
                 return;
         }
+        /* Clear lines from restored cursor position*/
+        printf("\033[u");
+        i=0;
+        while(i<5) {
+            printf("\033[K");
+            printf("\n");
+            i++;
+        }
+        printf("\033[u");
+
         if(p_head->progress == 4) {
             p_head = p_head->next;
             continue;
         }
-        char *p_word_len;
-        int i;
+
         if(settings == 1) {
-            puts(p_head->original);
-            p_word_len = p_head->translation;
+            strcpy(source, p_head->original);
+            strcpy(trans, p_head->translation);
+        } else {
+            strcpy(source, p_head->translation);
+            strcpy(trans, p_head->original);
         }
-        else {
-            puts(p_head->translation);
-            p_word_len = p_head->original;
-        }
-        printf(">> ");
+
+        puts(source);
+        printf(">> \033[K");
 
         i=0;
+        char *p_word_len = trans;
         while(*p_word_len != '\0'){
             printf("%c", 95);
             p_word_len++;
@@ -260,31 +317,34 @@ void trainer(list *head) {
         printf("\033[%dD", i);
         fgets(answer, 80, stdin);
         answer[strcspn(answer, "\n")] = 0;
-        if(settings == 1) {
-            if(strcmp(answer, p_head->translation)) {
+        if(!strcmp(answer, "stop")) {
+            return;
+        } else if(!strcmp(answer, "help")) {
+            printf("\033[1A>> ");
+            i=0;
+            p_word_len = trans;
+            while(*p_word_len != '\0'){
+                if(i%2)
+                    printf("%c",trans[i]);
+                else {
+                    printf("%c", 95);
+                }
+                p_word_len++;
+                i++;
+            }
+            getc(stdin);
+            continue;
+        } else if(strcmp(answer, trans)) {
                 puts("Leider falsch.");
-                printf("Die richtige Antwort lautet: %s\n", p_head->translation);
                 printf("Deine Antwort war: %s\n", answer);
+                printf("Die richtige Antwort lautet: %s\n", trans);
                 if(p_head->progress>0)
                   p_head->progress--;
-            }
-            else {
-                puts("RICHTIG!");
-                p_head->progress++;
-            }
         } else {
-            if(strcmp(answer, p_head->original)) {
-                puts("Leider falsch.");
-                printf("Die richtige Antwort lautet: %s\n", p_head->original);
-                printf("Deine Antwort war: %s\n", answer);
-                if(p_head->progress>0)
-                  p_head->progress--;
-            }
-            else {
-                puts("RICHTIG!");
-                p_head->progress++;
-            }
+            puts("RICHTIG!");
+            p_head->progress++;
         }
+        getc(stdin);
         p_head = p_head->next;
     }
 }
@@ -294,14 +354,16 @@ int menue() {
     int choice = -1;
     while(choice < 0 | choice > 3) {
         choice = -1;
-        puts("|                           HAUPTMENUE                            |");
-        puts("*******************************************************************");
-        puts("| 1. Training starten                                             |");
-        puts("| 2. Vokabeln hinzufügen                                          |");
-        puts("| 3. Vokabeln anzeigen                                            |");
-        puts("*******************************************************************");
-        puts("| 0. Speichern und Verlassen                                      |");
-        puts("*******************************************************************");
+        puts("║                                                                 ║");
+        puts("║                           HAUPTMENUE                            ║");
+        puts("║                                                                 ║");
+        puts("╠═════════════════════════════════════════════════════════════════╣");
+        puts("║ 1. Training starten                                             ║");
+        puts("║ 2. Vokabeln hinzufügen                                          ║");
+        puts("║ 3. Vokabeln anzeigen                                            ║");
+        puts("╠═════════════════════════════════════════════════════════════════╣");
+        puts("║ 0. Speichern und Verlassen                                      ║");
+        puts("╚═════════════════════════════════════════════════════════════════╝");
         printf(">> ");
         scanf("%d", &choice);
     }
