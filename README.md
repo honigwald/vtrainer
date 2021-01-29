@@ -1,5 +1,5 @@
 # vtrainer
-This project acts as simple vocabulary trainer. 
+This project acts as simple vocabulary trainer. <br/>
 You can add new vocabulary through it's interface, show the spellbook or start a training. 
 
 CLI
